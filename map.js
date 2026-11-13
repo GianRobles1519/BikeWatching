@@ -1,12 +1,14 @@
 // Import Mapbox as an ESM module
 import mapboxgl from 'https://cdn.jsdelivr.net/npm/mapbox-gl@2.15.0/+esm';
+// Import D3 as an ESM module
+import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm';
 
 // Check that Mapbox GL JS is loaded
 console.log('Mapbox GL JS Loaded:', mapboxgl);
 
 // Set your Mapbox access token here
-mapboxgl.accessToken = 'pk.eyJ1IjoiZ2Nyb2JsZXMiLCJhIjoiY213ZmVvZ3puMDBqZDJ6cHkzYTBiaHR3ayJ9.yWlWnCg0tFw1YFdCQMz01g';
-
+mapboxgl.accessToken =
+  'pk.eyJ1IjoiZ2Nyb2JsZXMiLCJhIjoiY213ZmVvZ3puMDBqZDJ6cHkzYTBiaHR3ayJ9.yWlWnCg0tFw1YFdCQMz01g';
 
 // Initialize the map
 const map = new mapboxgl.Map({
@@ -18,14 +20,22 @@ const map = new mapboxgl.Map({
   maxZoom: 18, // Maximum allowed zoom
 });
 
-
-
 // Shared style for all bike lane layers
 const bikeLaneStyle = {
   'line-color': '#32D400', // A bright green using hex code
   'line-width': 5, // Thicker lines
   'line-opacity': 0.6, // Slightly less transparent
 };
+
+// Select the SVG overlay inside the map container
+const svg = d3.select('#map').select('svg');
+
+// Convert a station's lon/lat into pixel coordinates on the map
+function getCoords(station) {
+  const point = new mapboxgl.LngLat(+station.lon, +station.lat); // Convert lon/lat to Mapbox LngLat
+  const { x, y } = map.project(point); // Project to pixel coordinates
+  return { cx: x, cy: y }; // Return as object for use in SVG attributes
+}
 
 // Wait for the map to finish loading before adding data
 map.on('load', async () => {
@@ -54,4 +64,49 @@ map.on('load', async () => {
     source: 'cambridge_route',
     paint: bikeLaneStyle,
   });
+
+  // Load Bluebikes station data
+  let jsonData;
+  try {
+    const jsonurl = 'https://dsc106.com/labs/lab07/data/bluebikes-stations.json';
+
+    // Await JSON fetch
+    jsonData = await d3.json(jsonurl);
+
+    console.log('Loaded JSON Data:', jsonData); // Log to verify structure
+  } catch (error) {
+    console.error('Error loading JSON:', error); // Handle errors
+    return;
+  }
+
+  let stations = jsonData.data.stations;
+  console.log('Stations Array:', stations);
+
+  // Append circles to the SVG for each station
+  const circles = svg
+    .selectAll('circle')
+    .data(stations)
+    .enter()
+    .append('circle')
+    .attr('r', 5) // Radius of the circle
+    .attr('fill', 'steelblue') // Circle fill color
+    .attr('stroke', 'white') // Circle border color
+    .attr('stroke-width', 1) // Circle border thickness
+    .attr('opacity', 0.8); // Circle opacity
+
+  // Function to update circle positions when the map moves/zooms
+  function updatePositions() {
+    circles
+      .attr('cx', (d) => getCoords(d).cx) // Set the x-position using projected coordinates
+      .attr('cy', (d) => getCoords(d).cy); // Set the y-position using projected coordinates
+  }
+
+  // Initial position update when map loads
+  updatePositions();
+
+  // Reposition markers on map interactions
+  map.on('move', updatePositions); // Update during map movement
+  map.on('zoom', updatePositions); // Update during zooming
+  map.on('resize', updatePositions); // Update on window resize
+  map.on('moveend', updatePositions); // Final adjustment after movement ends
 });
