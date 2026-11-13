@@ -23,3 +23,32 @@ body {
   height: 100%;
   pointer-events: none; /* Let clicks/drags pass through to the map */
 }
+
+#map svg circle {
+  fill: steelblue;
+  fill-opacity: 60%;
+  stroke: white;
+  stroke-width: 1;
+  pointer-events: auto; /* Re-enable hover so tooltips show */
+}
+
+header {
+  display: flex;
+  gap: 1em;
+  align-items: baseline;
+  align-self: stretch; /* Span the full width so the label can sit on the right */
+}
+
+header label {
+  margin-left: auto;
+}
+
+header time,
+header em {
+  display: block; /* Own line, so changing text doesn't shift the slider */
+}
+
+header em {
+  color: #888;
+  font-style: italic;
+}
