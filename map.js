@@ -5,8 +5,8 @@ import mapboxgl from 'https://cdn.jsdelivr.net/npm/mapbox-gl@2.15.0/+esm';
 console.log('Mapbox GL JS Loaded:', mapboxgl);
 
 // Set your Mapbox access token here
-mapboxgl.accessToken =
-  'pk.eyJ1IjoiZ2Nyb2JsZXMiLCJhIjoiY213ZmVvZ3puMDBqZDJ6cHkzYTBiaHR3ayJ9.yWlWnCg0tFw1YFdCQMz01g';
+mapboxgl.accessToken = 'pk.eyJ1IjoiZ2Nyb2JsZXMiLCJhIjoiY213ZmVvZ3puMDBqZDJ6cHkzYTBiaHR3ayJ9.yWlWnCg0tFw1YFdCQMz01g';
+
 
 // Initialize the map
 const map = new mapboxgl.Map({
@@ -17,3 +17,5 @@ const map = new mapboxgl.Map({
   minZoom: 5, // Minimum allowed zoom
   maxZoom: 18, // Maximum allowed zoom
 });
+
+
