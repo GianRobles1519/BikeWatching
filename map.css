@@ -24,8 +24,20 @@ body {
   pointer-events: none; /* Let clicks/drags pass through to the map */
 }
 
+/* Shared colors for station circles and legend swatches */
+#map svg circle,
+.legend > div {
+  --color-departures: steelblue;
+  --color-arrivals: darkorange;
+  --color: color-mix(
+    in oklch,
+    var(--color-departures) calc(100% * var(--departure-ratio)),
+    var(--color-arrivals)
+  );
+}
+
 #map svg circle {
-  fill: steelblue;
+  fill: var(--color);
   fill-opacity: 60%;
   stroke: white;
   stroke-width: 1;
@@ -51,4 +63,30 @@ header em {
 header em {
   color: #888;
   font-style: italic;
+}
+
+/* Legend: swatches with labels */
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 2em; /* Big gap between items */
+  margin-block: 1em;
+}
+
+.legend-title {
+  color: #888;
+}
+
+.legend > div {
+  display: flex;
+  align-items: center;
+  gap: 0.4em; /* Small gap so each swatch sits close to its label */
+}
+
+.legend > div::before {
+  content: '';
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  background: var(--color);
 }

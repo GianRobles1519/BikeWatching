@@ -27,6 +27,14 @@ const bikeLaneStyle = {
   'line-opacity': 0.6, // Slightly less transparent
 };
 
+// Map departure ratio (0–1) to 3 discrete values: more arrivals / balanced / more departures
+let stationFlow = d3.scaleQuantize().domain([0, 1]).range([0, 0.5, 1]);
+
+// Departure ratio for a station's color (stations with no trips count as balanced)
+function departureRatio(d) {
+  return d.totalTraffic ? stationFlow(d.departures / d.totalTraffic) : 0.5;
+}
+
 // Trips bucketed by minute of the day (0–1439) for fast time filtering
 let departuresByMinute = Array.from({ length: 1440 }, () => []);
 let arrivalsByMinute = Array.from({ length: 1440 }, () => []);
@@ -173,6 +181,7 @@ map.on('load', async () => {
     .enter()
     .append('circle')
     .attr('r', (d) => radiusScale(d.totalTraffic)) // Radius based on traffic
+    .style('--departure-ratio', departureRatio) // Color by traffic flow
     .each(function (d) {
       // Add <title> for browser tooltips
       d3.select(this)
@@ -230,6 +239,7 @@ map.on('load', async () => {
       .data(filteredStations, (d) => d.short_name) // Ensure D3 tracks elements correctly
       .join('circle')
       .attr('r', (d) => radiusScale(d.totalTraffic)) // Update circle sizes
+      .style('--departure-ratio', departureRatio) // Update colors
       .select('title') // Keep tooltip numbers in sync with the filter
       .text(
         (d) =>
